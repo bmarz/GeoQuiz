@@ -11,8 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
@@ -23,13 +21,6 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
-
-    private ArrayList<Integer> mAnsweredList = new ArrayList<>();
-    private ArrayList<Boolean> mCorrectList = new ArrayList<>();
-    private String mScore;
-
-    private String mCorrectToast = "Correct! ";
-    private String mIncorrectToast = "Incorrect! ";
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
@@ -84,7 +75,6 @@ public class QuizActivity extends AppCompatActivity {
                     mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
                 }
                 updateQuestion();
-                dissableAnswerButtons();
             }
         });
 
@@ -94,7 +84,6 @@ public class QuizActivity extends AppCompatActivity {
             public void onClick(View view) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
                 updateQuestion();
-                dissableAnswerButtons();
             }
         });
     }
@@ -109,29 +98,6 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_asia, true),
     };
 
-    private void scoreAnswer(Integer index, Boolean correct) {
-        if (!mAnsweredList.contains(index)) {
-            mAnsweredList.add(index);
-        }
-        dissableAnswerButtons();
-        if (correct) {
-            mCorrectList.add(correct);
-        }
-        int score = (int)Math.round(100.0 * mCorrectList.size() / mQuestionBank.length);
-        mScore = " Score: " + score + "%";
-    }
-
-    private void dissableAnswerButtons() {
-        if (mAnsweredList.contains(mCurrentIndex)) {
-            mTrueButton.setEnabled(false);
-            mFalseButton.setEnabled(false);
-        }
-        else {
-            mTrueButton.setEnabled(true);
-            mFalseButton.setEnabled(true);
-        }
-    }
-
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
@@ -139,17 +105,15 @@ public class QuizActivity extends AppCompatActivity {
 
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        String message;
+        int messageReasId = 0;
         if ( userPressedTrue == answerIsTrue) {
-            scoreAnswer(mCurrentIndex, true);
-            message = mCorrectToast + mScore;
+            messageReasId = R.string.correct_toast;
         }
         else {
-            scoreAnswer(mCurrentIndex, false);
-            message = mIncorrectToast + mScore;
+            messageReasId = R.string.incorrect_toast;
         }
 
-        Toast toast = Toast.makeText(QuizActivity.this, message,
+        Toast toast = Toast.makeText(QuizActivity.this, messageReasId,
                 Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.TOP,0,250);
         toast.show();
