@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+
 public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
@@ -22,15 +24,18 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String CHEATED = "cheated";
     private static final int CHILD_ID = 0;
 
-    private boolean mIsCheater;
+    private int mCurrentIndex = 0;
+    private HashMap<Integer, Boolean> mCheatList = new HashMap<>();
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putSerializable(CHEATED, mCheatList);
     }
 
     @Override
@@ -41,6 +46,7 @@ public class QuizActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mCheatList = (HashMap<Integer, Boolean>) savedInstanceState.getSerializable(CHEATED);
         }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -73,7 +79,6 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -98,11 +103,11 @@ public class QuizActivity extends AppCompatActivity {
             if (data == null) {
                 return;
             }
-            mIsCheater = CheatActivity.wasAnswerShown(data);
+            mCheatList.put(mCurrentIndex, CheatActivity.wasAnswerShown(data));
         }
     }
 
-    private int mCurrentIndex = 0;
+
     private Question[] mQuestionBank = new Question[] {
             new Question(R.string.question_australia, true),
             new Question(R.string.question_oceans, true),
@@ -121,7 +126,11 @@ public class QuizActivity extends AppCompatActivity {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageReasId = 0;
 
-        if (mIsCheater) {
+        if (mCheatList.get(mCurrentIndex) == null) {
+            mCheatList.put(mCurrentIndex, false);
+        }
+
+        if (mCheatList.get(mCurrentIndex)) {
             messageReasId = R.string.judgment_toast;
         }
         else {

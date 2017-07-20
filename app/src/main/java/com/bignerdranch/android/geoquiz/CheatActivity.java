@@ -12,7 +12,10 @@ public class CheatActivity extends AppCompatActivity {
 
     private static final String EXTRA_ANSWER_IS_TRUE = "com.bignerdranch.android.geoquiz.answer_is_true";
     private static final String EXTRA_ANSWER_SHOWN = "com.bignerdranch.android.geoquiz.answer_shown";
+    private static final String CHEAT = "cheat";
+    private static final String ANSWER = "answer";
     private boolean mAnswerIsTrue;
+    private boolean mCheated;
 
     private TextView mAnswerTextView;
     private Button mShowAnswerButton;
@@ -22,26 +25,51 @@ public class CheatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putSerializable(CHEAT, mCheated);
+        state.putSerializable(ANSWER, mAnswerIsTrue);
+    }
+
+    @Override
+    protected void onCreate(Bundle state) {
+        super.onCreate(state);
         setContentView(R.layout.activity_cheat);
 
-        mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
+        if (state != null) {
+            if (state.getSerializable(CHEAT) != null) {
+                mCheated = (boolean) state.getSerializable(CHEAT);
+            }
+            if (state.getSerializable(ANSWER) != null) {
+                mAnswerIsTrue = (boolean) state.getSerializable(ANSWER);
+            }
+        }
+        else {
+            mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
+            mCheated = false;
+        }
 
         mAnswerTextView = (TextView) findViewById(R.id.answer_text_view);
         mShowAnswerButton = (Button) findViewById(R.id.show_answer_button);
         mShowAnswerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mAnswerIsTrue) {
-                    mAnswerTextView.setText(R.string.true_button);
-                }
-                else {
-                    mAnswerTextView.setText(R.string.false_button);
-                }
-                setAnswerShownResult(true);
+                showAnswer();
             }
         });
+
+        if (mCheated) { showAnswer(); }
+    }
+
+    private void showAnswer() {
+        if (mAnswerIsTrue) {
+            mAnswerTextView.setText(R.string.true_button);
+        }
+        else {
+            mAnswerTextView.setText(R.string.false_button);
+        }
+        mCheated = true;
+        setAnswerShownResult(true);
     }
 
     public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
