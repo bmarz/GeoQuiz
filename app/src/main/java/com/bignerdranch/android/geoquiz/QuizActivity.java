@@ -91,10 +91,10 @@ public class QuizActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != Activity.RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
             return;
         }
-        if (resultCode == CHILD_ID) {
+        if (requestCode == CHILD_ID) {
             if (data == null) {
                 return;
             }
