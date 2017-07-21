@@ -20,4 +20,6 @@
     <string name="cheat_button">Cheat!</string>
     <string name="judgment_toast">Cheating is wrong :(</string>
 
+    <string name="no_cheats">No Cheats Remaining, Cheater!!</string>
+
 </resources>

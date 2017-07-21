@@ -19,9 +19,12 @@ public class QuizActivity extends AppCompatActivity {
     private Button mNextButton;
     private Button mCheatButton;
     private TextView mQuestionTextView;
+    private TextView mCheatsRemainingTV;
+    private int mCheatsRemaining = 3;
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String CHEATS = "cheats";
     private static final int CHILD_ID = 0;
 
     private boolean mIsCheater;
@@ -31,6 +34,7 @@ public class QuizActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putInt(CHEATS, mCheatsRemaining);
     }
 
     @Override
@@ -41,6 +45,7 @@ public class QuizActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mCheatsRemaining = savedInstanceState.getInt(CHEATS, 0);
         }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -78,15 +83,29 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        mCheatsRemainingTV = (TextView) findViewById(R.id.cheats_remaining_textview);
+        mCheatsRemainingTV.setText("Cheats: " + String.valueOf(mCheatsRemaining));
+
         mCheatButton = (Button) findViewById(R.id.cheat_button);
         mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
-                startActivityForResult(intent, CHILD_ID);
+                if (mCheatsRemaining > 0) {
+                    cheatCounting();
+                    boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                    Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                    startActivityForResult(intent, CHILD_ID);
+                }
+                else {
+                    Toast.makeText(QuizActivity.this, R.string.no_cheats, Toast.LENGTH_SHORT).show();
+                }
             }
         });
+    }
+
+    void cheatCounting() {
+        mCheatsRemaining -= 1;
+        mCheatsRemainingTV.setText("Cheats: " + String.valueOf(mCheatsRemaining));
     }
 
     @Override
